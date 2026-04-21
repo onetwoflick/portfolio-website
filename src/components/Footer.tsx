@@ -21,7 +21,8 @@ export default function Footer() {
             Email Me
           </a>
           <a 
-            href="#" 
+            href="/resume.pdf" 
+            download="Jojo_Jose_Resume.pdf"
             className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg glassmorphism hover:bg-white/10 transition-colors font-medium border border-white/20 text-white"
           >
             <Download size={18} />
