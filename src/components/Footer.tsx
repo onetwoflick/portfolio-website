@@ -34,7 +34,7 @@ export default function Footer() {
         <p>© {new Date().getFullYear()} Jojo Jose. All rights reserved.</p>
         <div className="flex items-center gap-4">
           <a href="https://github.com/onetwoflick" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" aria-label="Github Profile"><FaGithub size={20} /></a>
-          <a href="#" className="hover:text-primary transition-colors" aria-label="LinkedIn Profile"><FaLinkedin size={20} /></a>
+          <a href="https://www.linkedin.com/in/jojo-jose-9001b3218/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" aria-label="LinkedIn Profile"><FaLinkedin size={20} /></a>
         </div>
       </div>
     </footer>
