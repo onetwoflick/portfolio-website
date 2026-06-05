@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { type Project, projectsData } from '../../data/projects';
-import { FaGithub, FaPlay, FaUndo } from 'react-icons/fa';
+import { FaGithub, FaPlay, FaUndo, FaExternalLinkAlt } from 'react-icons/fa';
 
 interface ProjectDetailProps {
   projectIndex: number;
@@ -224,6 +224,20 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
                 </span>
               </a>
             )}
+            {project.liveLink && (
+              <a
+                href={project.liveLink}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex items-center gap-2 text-xs font-display font-bold tracking-wider text-textPrimary hover:text-accent uppercase transition-colors"
+              >
+                <FaExternalLinkAlt size={13} />
+                Live Demo
+                <span className="opacity-0 group-hover:opacity-100 transform translate-x-[-4px] group-hover:translate-x-0 transition-all">
+                  ↗
+                </span>
+              </a>
+            )}
           </div>
         </motion.div>
       </div>
@@ -267,9 +281,9 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
         </div>
 
         {/* Main Content Area */}
-        <div className="p-6 relative overflow-hidden bg-gradient-to-br from-bg/10 via-surface to-accent/5">
+        <div className="relative overflow-hidden bg-gradient-to-br from-bg/10 via-surface to-accent/5">
           {project.id === 'cyberrunner' ? (
-            <div className="flex flex-col items-center gap-4">
+            <div className="p-6 flex flex-col items-center gap-4">
               <div className="text-center mb-2">
                 <h4 className="font-display text-sm font-bold text-textPrimary uppercase tracking-wider">
                   Interactive Pathfinding Simulation
@@ -337,9 +351,19 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
                 )}
               </div>
             </div>
+          ) : project.liveLink ? (
+            // Live Interactive Website Embed (Safari/Chrome style mockup)
+            <div className="w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-white">
+              <iframe
+                src={project.liveLink}
+                title={`Live demo of ${project.title}`}
+                className="w-full h-full border-none"
+                loading="lazy"
+              />
+            </div>
           ) : (
             // Standard Visual Cards for other projects
-            <div className="flex-1 flex flex-col justify-center items-center p-6 min-h-[220px]">
+            <div className="p-6 flex-1 flex flex-col justify-center items-center min-h-[220px]">
               <div className="text-center z-10 flex flex-col items-center gap-2">
                 <h3 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-textPrimary">
                   {project.title}

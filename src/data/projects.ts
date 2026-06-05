@@ -21,6 +21,7 @@ export const projectsData: Project[] = [
     detailedDescription: 'Engineered a comprehensive full-stack digital memorial and gallery application. Designed scalable PostgreSQL schemas in Supabase and implemented secure email/OAuth user authentication. Integrated Stripe subscription payment flows to facilitate premium digital memory creation and secure cloud media storage.',
     technologies: ['Next.js', 'Supabase', 'Stripe', 'PostgreSQL', 'Tailwind CSS'],
     githubLink: 'https://github.com/onetwoflick/memorial-app',
+    liveLink: 'https://memorial-app-gules.vercel.app/',
     image: '/memory_lane.png'
   },
   {
