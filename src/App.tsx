@@ -1,24 +1,106 @@
-import Hero from './components/Hero';
-import TechStack from './components/TechStack';
-import Experience from './components/Experience';
-import Projects from './components/Projects';
-import Education from './components/Education';
-import Footer from './components/Footer';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Global Effects & Navigation
+import SplashScreen from './components/SplashScreen';
+import CustomCursor from './components/CustomCursor';
+import InteractiveCanvas from './components/InteractiveCanvas';
+import Header from './components/Header';
+import NavigationMenu from './components/NavigationMenu';
+
+// Page Components
+import Home from './components/pages/Home';
+import Work from './components/pages/Work';
+import ProjectDetail from './components/pages/ProjectDetail';
+import About from './components/pages/About';
+import Contact from './components/pages/Contact';
 
 function App() {
+  const [page, setPage] = useState<string>('home');
+  const [projectIndex, setProjectIndex] = useState<number>(0);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+
+  // Initialize theme choice on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const handleSelectProject = (index: number) => {
+    setProjectIndex(index);
+    setPage('project-detail');
+  };
+
+  const renderPage = () => {
+    switch (page) {
+      case 'home':
+        return <Home onNavigate={setPage} />;
+      case 'work':
+        return <Work onSelectProject={handleSelectProject} />;
+      case 'project-detail':
+        return (
+          <ProjectDetail
+            projectIndex={projectIndex}
+            onNavigateBack={() => setPage('work')}
+            onSelectProject={handleSelectProject}
+          />
+        );
+      case 'about':
+        return <About />;
+      case 'contact':
+        return <Contact />;
+      default:
+        return <Home onNavigate={setPage} />;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/30 selection:text-white font-sans text-textPrimary">
-      {/* Subtle dynamic background effect */}
-      <div className="fixed inset-0 z-0 pointer-events-none opacity-30" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.05) 0%, rgba(10, 10, 10, 1) 100%)' }} />
-      
-      <div className="relative z-10">
-        <Hero />
-        <TechStack />
-        <Experience />
-        <Projects />
-        <Education />
-        <Footer />
-      </div>
+    <div className="min-h-screen bg-bg text-textPrimary selection:bg-accent selection:text-bg overflow-x-hidden relative">
+      {/* 1. Loader Screen */}
+      <SplashScreen />
+
+      {/* 2. Custom Spring Cursor */}
+      <CustomCursor />
+
+      {/* 3. Orbiting Canvas Geometry Background */}
+      <InteractiveCanvas />
+
+      {/* 4. Top Overlay Header */}
+      <Header
+        isMenuOpen={isMenuOpen}
+        setIsMenuOpen={setIsMenuOpen}
+        onNavigate={setPage}
+      />
+
+      {/* 5. Navigation Full-Screen Overlay */}
+      <NavigationMenu
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        onNavigate={setPage}
+        currentPage={page}
+      />
+
+      {/* 6. Dynamic Animated Content Container */}
+      <main className="relative z-10 w-full min-h-screen flex flex-col justify-between">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={page === 'project-detail' ? `detail-${projectIndex}` : page}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="flex-1 w-full"
+          >
+            {renderPage()}
+          </motion.div>
+        </AnimatePresence>
+      </main>
     </div>
   );
 }
