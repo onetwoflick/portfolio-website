@@ -20,17 +20,23 @@ function App() {
   const [projectIndex, setProjectIndex] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
-  // Initialize theme choice on mount
-  useEffect(() => {
+  // Initialize theme choice state
+  const [isDark, setIsDark] = useState<boolean>(() => {
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+    return savedTheme === 'dark' || (!savedTheme && prefersDark);
+  });
+
+  // Synchronize document theme class with isDark state
+  useEffect(() => {
+    if (isDark) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
-  }, []);
+  }, [isDark]);
 
   const handleSelectProject = (index: number) => {
     setProjectIndex(index);
@@ -76,6 +82,8 @@ function App() {
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
         onNavigate={setPage}
+        isDark={isDark}
+        setIsDark={setIsDark}
       />
 
       {/* 5. Navigation Full-Screen Overlay */}

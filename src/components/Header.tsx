@@ -1,31 +1,16 @@
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface HeaderProps {
   isMenuOpen: boolean;
   setIsMenuOpen: (open: boolean) => void;
   onNavigate: (page: string) => void;
+  isDark: boolean;
+  setIsDark: (dark: boolean) => void;
 }
 
-export default function Header({ isMenuOpen, setIsMenuOpen, onNavigate }: HeaderProps) {
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    // Check initial theme state on mount
-    const hasDark = document.documentElement.classList.contains('dark');
-    setIsDark(hasDark);
-  }, []);
-
+export default function Header({ isMenuOpen, setIsMenuOpen, onNavigate, isDark, setIsDark }: HeaderProps) {
   const toggleTheme = () => {
-    const newDark = !isDark;
-    setIsDark(newDark);
-    if (newDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
+    setIsDark(!isDark);
   };
 
   return (
