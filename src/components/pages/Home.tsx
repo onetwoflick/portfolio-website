@@ -1,10 +1,8 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
-interface HomeProps {
-  onNavigate: (page: string) => void;
-}
-
-export default function Home({ onNavigate }: HomeProps) {
+export default function Home() {
+  const navigate = useNavigate();
   // Stagger reveal animations for lines of text
   const containerVariants = {
     hidden: {},
@@ -64,27 +62,27 @@ export default function Home({ onNavigate }: HomeProps) {
         {/* Roles Description */}
         <motion.div variants={itemVariants} className="max-w-2xl mt-2 flex flex-col gap-2">
           <p className="font-sans text-base sm:text-lg text-textSecondary leading-relaxed">
-            I’m a versatile Computer Science graduate & Cybersecurity candidate. I specialize in streamlining data workflows, securing networks, and building automated, high-performance systems.
+            I’m a versatile Computer Science graduate & M.S. Cybersecurity student. I specialize in streamlining data workflows, securing networks, and building automated, high-performance systems.
           </p>
         </motion.div>
 
         {/* Action Links */}
         <motion.div variants={itemVariants} className="mt-8 flex flex-col sm:flex-row gap-6">
           <button
-            onClick={() => onNavigate('work')}
-            className="group flex items-center gap-3 text-left focus:outline-none"
+            onClick={() => navigate('/work')}
+            className="group flex items-center gap-3 text-left focus:outline-none py-2.5 pr-4 pointer-events-auto"
           >
-            <span className="font-display font-bold text-sm tracking-wider uppercase text-textPrimary group-hover:text-accent transition-colors duration-200">
+            <span className="font-display font-bold text-base md:text-lg tracking-wider uppercase text-textPrimary group-hover:text-accent transition-colors duration-200">
               → See my projects
             </span>
             <span className="h-px bg-textPrimary group-hover:bg-accent w-12 group-hover:w-20 transition-all duration-300" />
           </button>
 
           <button
-            onClick={() => onNavigate('about')}
-            className="group flex items-center gap-3 text-left focus:outline-none"
+            onClick={() => navigate('/about')}
+            className="group flex items-center gap-3 text-left focus:outline-none py-2.5 pr-4 pointer-events-auto"
           >
-            <span className="font-display font-bold text-sm tracking-wider uppercase text-textPrimary group-hover:text-accent transition-colors duration-200">
+            <span className="font-display font-bold text-base md:text-lg tracking-wider uppercase text-textPrimary group-hover:text-accent transition-colors duration-200">
               → More about me
             </span>
             <span className="h-px bg-textPrimary group-hover:bg-accent w-12 group-hover:w-20 transition-all duration-300" />

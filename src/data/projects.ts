@@ -8,6 +8,7 @@ export interface Project {
   technologies: string[];
   githubLink?: string;
   liveLink?: string;
+  videoLink?: string;
   image: string;
 }
 
@@ -33,6 +34,7 @@ export const projectsData: Project[] = [
     detailedDescription: 'Re-engineered autonomous robotic systems within the Robot Operating System (ROS 2) environment. Autonomously constructed, debugged, and optimized real-time perception, state-estimation, and navigation modules to enable self-driving capabilities and reactive control in simulated environments.',
     technologies: ['ROS 2', 'Python', 'C++', 'Robotics', 'SLAM', 'Git'],
     githubLink: 'https://github.com/BKaropczyc/STAC_CyberRunner',
+    videoLink: 'https://www.instagram.com/reel/DNV1tXOq6zJ/',
     image: '/cyber_robotics.png'
   },
   {

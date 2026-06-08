@@ -17,7 +17,7 @@ export default function Contact() {
         <div className="overflow-hidden py-1">
           <a
             href="mailto:jojojose2003@gmail.com"
-            className="group flex flex-col sm:flex-row items-baseline gap-2 sm:gap-4 font-display text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-textPrimary hover:text-accent transition-colors duration-300"
+            className="group flex flex-col sm:flex-row items-baseline gap-2 sm:gap-4 font-display text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-textPrimary hover:text-accent transition-colors duration-300 break-all"
           >
             <span>jojojose2003@gmail.com</span>
             <span className="text-accent group-hover:translate-x-2 transition-transform duration-300 text-2xl sm:text-4xl md:text-5xl">
@@ -41,7 +41,7 @@ export default function Contact() {
             ↗ GitHub
           </a>
           <a
-            href="https://www.linkedin.com/in/jojo-jose-9001b3218/"
+            href="https://www.linkedin.com/in/jojo-jose-one-two/"
             target="_blank"
             rel="noreferrer"
             className="font-display font-bold text-xs tracking-widest text-textSecondary hover:text-accent uppercase transition-colors"

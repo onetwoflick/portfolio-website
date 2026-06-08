@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { projectsData } from './data/projects';
 
 // Global Effects & Navigation
 import SplashScreen from './components/SplashScreen';
@@ -16,9 +18,37 @@ import About from './components/pages/About';
 import Contact from './components/pages/Contact';
 
 function App() {
-  const [page, setPage] = useState<string>('home');
-  const [projectIndex, setProjectIndex] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const location = useLocation();
+
+  // Scroll restoration: force window to scroll back to top of page on path changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [location.pathname]);
+
+  // SEO Page Titles: update document title dynamically based on active path
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === '/') {
+      document.title = 'Jojo Jose | Cybersecurity & CS Portfolio';
+    } else if (path === '/work') {
+      document.title = 'Selected Projects | Jojo Jose';
+    } else if (path === '/about') {
+      document.title = 'About Me | Jojo Jose';
+    } else if (path === '/contact') {
+      document.title = 'Contact & Get In Touch | Jojo Jose';
+    } else if (path.startsWith('/project/')) {
+      const projectId = path.split('/').pop();
+      const project = projectsData.find((p) => p.id === projectId);
+      if (project) {
+        document.title = `${project.title} | Projects | Jojo Jose`;
+      } else {
+        document.title = 'Project Details | Jojo Jose';
+      }
+    } else {
+      document.title = 'Jojo Jose | Portfolio';
+    }
+  }, [location.pathname]);
 
   // Initialize theme choice state
   const [isDark, setIsDark] = useState<boolean>(() => {
@@ -38,34 +68,6 @@ function App() {
     }
   }, [isDark]);
 
-  const handleSelectProject = (index: number) => {
-    setProjectIndex(index);
-    setPage('project-detail');
-  };
-
-  const renderPage = () => {
-    switch (page) {
-      case 'home':
-        return <Home onNavigate={setPage} />;
-      case 'work':
-        return <Work onSelectProject={handleSelectProject} />;
-      case 'project-detail':
-        return (
-          <ProjectDetail
-            projectIndex={projectIndex}
-            onNavigateBack={() => setPage('work')}
-            onSelectProject={handleSelectProject}
-          />
-        );
-      case 'about':
-        return <About />;
-      case 'contact':
-        return <Contact />;
-      default:
-        return <Home onNavigate={setPage} />;
-    }
-  };
-
   return (
     <div className="min-h-screen bg-bg text-textPrimary selection:bg-accent selection:text-bg overflow-x-hidden relative">
       {/* 1. Loader Screen */}
@@ -81,7 +83,6 @@ function App() {
       <Header
         isMenuOpen={isMenuOpen}
         setIsMenuOpen={setIsMenuOpen}
-        onNavigate={setPage}
         isDark={isDark}
         setIsDark={setIsDark}
       />
@@ -90,22 +91,27 @@ function App() {
       <NavigationMenu
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
-        onNavigate={setPage}
-        currentPage={page}
       />
 
       {/* 6. Dynamic Animated Content Container */}
       <main className="relative z-10 w-full min-h-screen flex flex-col justify-between">
         <AnimatePresence mode="wait">
           <motion.div
-            key={page === 'project-detail' ? `detail-${projectIndex}` : page}
+            key={location.pathname}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="flex-1 w-full"
           >
-            {renderPage()}
+            <Routes location={location}>
+              <Route path="/" element={<Home />} />
+              <Route path="/work" element={<Work />} />
+              <Route path="/project/:id" element={<ProjectDetail />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
           </motion.div>
         </AnimatePresence>
       </main>

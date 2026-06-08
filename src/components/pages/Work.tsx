@@ -1,11 +1,9 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { type Project, projectsData } from '../../data/projects';
 
-interface WorkProps {
-  onSelectProject: (index: number) => void;
-}
-
-export default function Work({ onSelectProject }: WorkProps) {
+export default function Work() {
+  const navigate = useNavigate();
   const containerVariants = {
     hidden: {},
     show: {
@@ -48,17 +46,17 @@ export default function Work({ onSelectProject }: WorkProps) {
         animate="show"
         className="flex flex-col border-t border-borderAccent"
       >
-        {projectsData.map((project: Project, index: number) => (
+        {projectsData.map((project: Project) => (
           <motion.div
             key={project.id}
             variants={itemVariants}
-            onClick={() => onSelectProject(index)}
+            onClick={() => navigate(`/project/${project.id}`)}
             className="group flex flex-col md:flex-row md:items-center justify-between py-6 border-b border-borderAccent hover:bg-surface/30 px-2 transition-all duration-300 cursor-pointer relative"
           >
             {/* Left side: Date & Title & Role */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-10">
               {/* Year */}
-              <span className="font-mono text-xs text-textSecondary/75 tracking-wider w-20">
+              <span className="font-mono text-sm text-textSecondary font-semibold tracking-wider w-28">
                 {project.date}
               </span>
               

@@ -1,26 +1,44 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   isMenuOpen: boolean;
   setIsMenuOpen: (open: boolean) => void;
-  onNavigate: (page: string) => void;
   isDark: boolean;
   setIsDark: (dark: boolean) => void;
 }
 
-export default function Header({ isMenuOpen, setIsMenuOpen, onNavigate, isDark, setIsDark }: HeaderProps) {
+export default function Header({ isMenuOpen, setIsMenuOpen, isDark, setIsDark }: HeaderProps) {
+  const navigate = useNavigate();
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const toggleTheme = () => {
     setIsDark(!isDark);
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 px-6 py-5 md:px-10 md:py-8 pointer-events-none">
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 pointer-events-none ${
+        isScrolled 
+          ? 'header-scrolled py-3 px-6 md:py-4 md:px-10' 
+          : 'py-5 px-6 md:py-8 md:px-10'
+      }`}
+    >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         
         {/* Left Side: Logo & Name */}
         <div className="flex items-center gap-4 pointer-events-auto">
           <motion.button
-            onClick={() => onNavigate('home')}
+            onClick={() => navigate('/')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="flex items-center justify-center w-11 h-11 rounded-full bg-white dark:bg-zinc-900 border border-borderAccent shadow-sm font-mono text-sm font-bold text-accent select-none"
@@ -30,7 +48,7 @@ export default function Header({ isMenuOpen, setIsMenuOpen, onNavigate, isDark, 
           </motion.button>
           
           <motion.button
-            onClick={() => onNavigate('home')}
+            onClick={() => navigate('/')}
             className="text-left font-display leading-tight"
           >
             <h1 className="text-sm font-bold tracking-wide text-textPrimary uppercase">Jojo Jose</h1>

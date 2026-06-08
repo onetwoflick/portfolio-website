@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion, useMotionValue } from 'framer-motion';
 
 export default function CustomCursor() {
   const [hovered, setHovered] = useState(false);
@@ -9,11 +9,6 @@ export default function CustomCursor() {
   // Framer Motion motion values for high-performance coordinate tracking
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
-
-  // Spring physics config for smooth trailing delay
-  const springConfig = { damping: 30, stiffness: 220, mass: 0.6 };
-  const cursorX = useSpring(mouseX, springConfig);
-  const cursorY = useSpring(mouseY, springConfig);
 
   useEffect(() => {
     // Detect touch-screen device
@@ -79,23 +74,23 @@ export default function CustomCursor() {
 
   return (
     <>
-      {/* Outer Spring Ring */}
+      {/* Outer Spring Ring (Lag-free Rounded Circle) */}
       <motion.div
         className="fixed top-0 left-0 rounded-full pointer-events-none z-[99999] mix-blend-difference"
         style={{
-          x: cursorX,
-          y: cursorY,
+          x: mouseX,
+          y: mouseY,
           translateX: '-50%',
           translateY: '-50%',
-          width: hovered ? 72 : 36,
-          height: hovered ? 72 : 36,
+          width: 30,
+          height: 30,
           border: hovered ? '1.5px solid var(--color-accent)' : '1px solid var(--color-text-primary)',
           backgroundColor: hovered ? 'rgba(120, 255, 209, 0.05)' : 'rgba(0,0,0,0)',
         }}
         animate={{
-          scale: hovered ? 1 : 1,
+          scale: hovered ? 2.0 : 1.0,
         }}
-        transition={{ type: 'tween', ease: 'backOut', duration: 0.2 }}
+        transition={{ type: 'tween', ease: 'easeOut', duration: 0.18 }}
       />
       {/* Inner Dot */}
       <motion.div

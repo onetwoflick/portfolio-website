@@ -70,12 +70,6 @@ export default function InteractiveCanvas() {
     // Active data pulses traveling along connections
     const pulses: Pulse[] = [];
 
-    const getDistance = (n1: Node, n2: Node) => {
-      const dx = n1.x - n2.x;
-      const dy = n1.y - n2.y;
-      return Math.sqrt(dx * dx + dy * dy);
-    };
-
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
@@ -86,6 +80,7 @@ export default function InteractiveCanvas() {
 
       const isDark = document.documentElement.classList.contains('dark');
       const connectionDist = 115;
+      const connectionDistSq = connectionDist * connectionDist;
       const mouseInfluenceDist = 140;
 
       // Color scheme based on active theme
@@ -132,12 +127,18 @@ export default function InteractiveCanvas() {
         }
       });
 
-      // 2. Draw connections
+      // 2. Draw connections (broadphase optimized with squared distance checks)
       const activeConnections: { from: number; to: number }[] = [];
       for (let i = 0; i < nodes.length; i++) {
+        const n1 = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
-          const dist = getDistance(nodes[i], nodes[j]);
-          if (dist < connectionDist) {
+          const n2 = nodes[j];
+          const dx = n1.x - n2.x;
+          const dy = n1.y - n2.y;
+          const distSq = dx * dx + dy * dy;
+
+          if (distSq < connectionDistSq) {
+            const dist = Math.sqrt(distSq);
             activeConnections.push({ from: i, to: j });
 
             // Fade opacity based on distance
@@ -145,8 +146,8 @@ export default function InteractiveCanvas() {
             ctx.strokeStyle = lineColor;
             ctx.lineWidth = alpha * 0.8;
             ctx.beginPath();
-            ctx.moveTo(nodes[i].x, nodes[i].y);
-            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.moveTo(n1.x, n1.y);
+            ctx.lineTo(n2.x, n2.y);
             ctx.stroke();
           }
         }

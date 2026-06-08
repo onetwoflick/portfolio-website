@@ -1,13 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useParams, useNavigate } from 'react-router-dom';
 import { type Project, projectsData } from '../../data/projects';
-import { FaGithub, FaPlay, FaUndo, FaExternalLinkAlt } from 'react-icons/fa';
-
-interface ProjectDetailProps {
-  projectIndex: number;
-  onNavigateBack: () => void;
-  onSelectProject: (index: number) => void;
-}
+import { FaGithub, FaPlay, FaUndo, FaExternalLinkAlt, FaInstagram } from 'react-icons/fa';
 
 interface Point {
   x: number;
@@ -55,27 +50,57 @@ const findPath = (grid: number[][]): Point[] => {
   return [];
 };
 
-export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectProject }: ProjectDetailProps) {
-  const project: Project = projectsData[projectIndex];
-  const totalProjects = projectsData.length;
-  const nextIndex = (projectIndex + 1) % totalProjects;
-  const nextProject = projectsData[nextIndex];
+export default function ProjectDetail() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  const projectIndex = projectsData.findIndex((p) => p.id === id);
 
   // Pathfinding Simulator States
   const [grid, setGrid] = useState<number[][]>(() =>
     Array(ROWS).fill(null).map(() => Array(COLS).fill(0))
   );
-  const [path, setPath] = useState<Point[]>([]);
   const [robotPos, setRobotPos] = useState<Point>(START);
   const [isAnimating, setIsAnimating] = useState(false);
   const [visitedHistory, setVisitedHistory] = useState<Point[]>([]);
 
-  useEffect(() => {
-    const calculatedPath = findPath(grid);
-    setPath(calculatedPath);
+  // State to track key changes for resetting pathfinding states
+  const [prevGrid, setPrevGrid] = useState<number[][]>(grid);
+  const [prevProjectIndex, setPrevProjectIndex] = useState<number>(projectIndex);
+
+  // Reset simulator if grid or project changes (state adjustment during rendering)
+  if (grid !== prevGrid || projectIndex !== prevProjectIndex) {
+    setPrevGrid(grid);
+    setPrevProjectIndex(projectIndex);
     setRobotPos(START);
     setVisitedHistory([]);
-  }, [grid, projectIndex]); // recalculate if grid or project changes
+  }
+
+  // Calculate path dynamically during render (memoized for performance)
+  const path = useMemo(() => {
+    return projectIndex !== -1 ? findPath(grid) : [];
+  }, [grid, projectIndex]);
+
+  // Fallback if project is not found or id is undefined (checked after all hooks)
+  if (projectIndex === -1) {
+    return (
+      <div className="min-h-screen px-6 md:px-12 max-w-5xl mx-auto pt-32 pb-16 flex flex-col justify-center items-center select-none text-center">
+        <h2 className="font-display text-2xl sm:text-3xl font-bold text-textPrimary">Project Not Found</h2>
+        <p className="font-sans text-sm text-textSecondary mt-2">The project you are looking for does not exist or has been moved.</p>
+        <button
+          onClick={() => navigate('/work')}
+          className="mt-6 px-4 py-2 border border-borderAccent hover:border-accent hover:text-accent font-display text-xs font-bold tracking-wider uppercase rounded transition-colors"
+        >
+          Back to Work
+        </button>
+      </div>
+    );
+  }
+
+  const project: Project = projectsData[projectIndex];
+  const totalProjects = projectsData.length;
+  const nextIndex = (projectIndex + 1) % totalProjects;
+  const nextProject = projectsData[nextIndex];
 
   const toggleWall = (r: number, c: number) => {
     if (isAnimating) return;
@@ -128,7 +153,7 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
       <motion.button
         initial={{ opacity: 0, x: 10 }}
         animate={{ opacity: 1, x: 0 }}
-        onClick={onNavigateBack}
+        onClick={() => navigate('/work')}
         className="group flex items-center gap-2 mb-10 text-textSecondary hover:text-accent font-display text-sm font-bold tracking-wider uppercase focus:outline-none"
       >
         <span className="transform group-hover:-translate-x-1.5 transition-all duration-200">
@@ -176,7 +201,7 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
           className="flex flex-col gap-6 border-t md:border-t-0 md:border-l border-borderAccent pt-8 md:pt-0 md:pl-10"
         >
           <div>
-            <span className="block text-[10px] font-display font-bold tracking-widest text-textSecondary/50 uppercase mb-1">
+            <span className="block text-xs font-display font-bold tracking-widest text-textSecondary uppercase mb-1">
               Timeline
             </span>
             <span className="font-sans text-sm font-bold text-textPrimary">
@@ -185,7 +210,7 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
           </div>
 
           <div>
-            <span className="block text-[10px] font-display font-bold tracking-widest text-textSecondary/50 uppercase mb-1">
+            <span className="block text-xs font-display font-bold tracking-widest text-textSecondary uppercase mb-1">
               Role
             </span>
             <span className="font-sans text-sm font-bold text-textPrimary">
@@ -194,14 +219,14 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
           </div>
 
           <div>
-            <span className="block text-[10px] font-display font-bold tracking-widest text-textSecondary/50 uppercase mb-1">
+            <span className="block text-xs font-display font-bold tracking-widest text-textSecondary uppercase mb-1">
               Stack
             </span>
             <div className="flex flex-wrap gap-1.5 mt-1">
               {project.technologies.map((tech) => (
                 <span
                   key={tech}
-                  className="font-sans text-[10px] tracking-wide uppercase px-2 py-0.5 rounded border border-borderAccent bg-surface text-textSecondary"
+                  className="font-sans text-xs tracking-wide uppercase px-2 py-0.5 rounded border border-borderAccent bg-surface text-textSecondary font-semibold"
                 >
                   {tech}
                 </span>
@@ -238,6 +263,20 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
                 </span>
               </a>
             )}
+            {project.videoLink && (
+              <a
+                href={project.videoLink}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex items-center gap-2 text-xs font-display font-bold tracking-wider text-textPrimary hover:text-accent uppercase transition-colors"
+              >
+                <FaInstagram size={16} />
+                Project Video Reel
+                <span className="opacity-0 group-hover:opacity-100 transform translate-x-[-4px] group-hover:translate-x-0 transition-all">
+                  ↗
+                </span>
+              </a>
+            )}
           </div>
         </motion.div>
       </div>
@@ -261,7 +300,7 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
           </div>
 
           {project.id === 'cyberrunner' && (
-            <div className="flex gap-4">
+            <div className="hidden sm:flex gap-2">
               <button
                 onClick={runSimulation}
                 disabled={isAnimating || path.length === 0}
@@ -283,8 +322,8 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
         {/* Main Content Area */}
         <div className="relative overflow-hidden bg-gradient-to-br from-bg/10 via-surface to-accent/5">
           {project.id === 'cyberrunner' ? (
-            <div className="p-6 flex flex-col items-center gap-4">
-              <div className="text-center mb-2">
+            <div className="p-4 sm:p-6 flex flex-col items-center gap-4">
+              <div className="text-center mb-1">
                 <h4 className="font-display text-sm font-bold text-textPrimary uppercase tracking-wider">
                   Interactive Pathfinding Simulation
                 </h4>
@@ -294,7 +333,10 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
               </div>
 
               {/* Pathfinding Grid */}
-              <div className="grid gap-1 border border-borderAccent p-1 bg-bg/20 rounded-lg max-w-full overflow-x-auto" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
+              <div 
+                className="grid gap-0.5 sm:gap-1 border border-borderAccent p-1 bg-bg/20 rounded-lg max-w-full touch-manipulation" 
+                style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}
+              >
                 {grid.map((row, r) =>
                   row.map((val, c) => {
                     const isStart = r === START.y && c === START.x;
@@ -316,11 +358,21 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
                         </svg>
                       );
                     } else if (isStart) {
-                      cellClass = 'border-accent bg-accent/20 text-accent'; // Start position
-                      cellContent = <span className="text-[8px] font-bold">START</span>;
+                      cellClass = 'border-accent bg-accent/20 text-accent font-bold'; // Start position
+                      cellContent = (
+                        <>
+                          <span className="block sm:hidden text-[10px]">S</span>
+                          <span className="hidden sm:block text-[8px] tracking-tighter">START</span>
+                        </>
+                      );
                     } else if (isGoal) {
-                      cellClass = 'border-red-500 bg-red-500/20 text-red-500'; // Goal position
-                      cellContent = <span className="text-[8px] font-bold">GOAL</span>;
+                      cellClass = 'border-red-500 bg-red-500/20 text-red-500 font-bold'; // Goal position
+                      cellContent = (
+                        <>
+                          <span className="block sm:hidden text-[10px]">G</span>
+                          <span className="hidden sm:block text-[8px] tracking-tighter">GOAL</span>
+                        </>
+                      );
                     } else if (isInCalculatedPath) {
                       cellClass = isVisited
                         ? 'bg-accent/40 border-accent/60'
@@ -331,7 +383,7 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
                       <div
                         key={`${r}-${c}`}
                         onClick={() => toggleWall(r, c)}
-                        className={`w-8 h-8 sm:w-10 sm:h-10 border flex items-center justify-center rounded transition-all duration-200 cursor-pointer hover:border-accent ${cellClass}`}
+                        className={`w-[22px] h-[22px] min-[375px]:w-[25px] min-[375px]:h-[25px] min-[425px]:w-[28px] min-[425px]:h-[28px] sm:w-8 sm:h-8 md:w-10 md:h-10 border flex items-center justify-center rounded transition-all duration-200 cursor-pointer hover:border-accent touch-manipulation ${cellClass}`}
                       >
                         {cellContent}
                       </div>
@@ -341,14 +393,32 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
               </div>
 
               {/* Status Message */}
-              <div className="font-mono text-[10px] text-textSecondary tracking-wide mt-2">
+              <div className="font-mono text-[10px] text-textSecondary tracking-wide mt-1 text-center">
                 {path.length === 0 ? (
                   <span className="text-red-500 font-bold">⚠️ SLAM ERROR: Goal Unreachable (Path Blocked)</span>
                 ) : isAnimating ? (
                   <span className="text-accent animate-pulse font-bold">▶ ROS2 STATE: Traversing path... ({robotPos.x}, {robotPos.y})</span>
                 ) : (
-                  <span>✓ NAVIGATION ENGINE: Ready | Path Length: {path.length} steps</span>
+                  <span>✓ NAVIGATION ENGINE: Ready | Path: {path.length} steps</span>
                 )}
+              </div>
+
+              {/* Mobile Simulation Controls (visible only on mobile) */}
+              <div className="flex sm:hidden gap-3 w-full justify-center mt-2">
+                <button
+                  onClick={runSimulation}
+                  disabled={isAnimating || path.length === 0}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded bg-accent text-bg text-[10px] font-display font-bold tracking-wider uppercase disabled:opacity-40 hover:bg-accentHover transition-colors shadow-sm"
+                >
+                  <FaPlay size={9} /> Execute SLAM
+                </button>
+                <button
+                  onClick={clearGrid}
+                  disabled={isAnimating}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded border border-borderAccent text-textSecondary text-[10px] font-display font-bold tracking-wider uppercase disabled:opacity-40 hover:text-textPrimary transition-colors"
+                >
+                  <FaUndo size={9} /> Clear Grid
+                </button>
               </div>
             </div>
           ) : project.liveLink ? (
@@ -386,7 +456,7 @@ export default function ProjectDetail({ projectIndex, onNavigateBack, onSelectPr
           Next Project
         </span>
         <button
-          onClick={() => onSelectProject(nextIndex)}
+          onClick={() => navigate(`/project/${nextProject.id}`)}
           className="group flex flex-col items-end text-right focus:outline-none"
         >
           <span className="font-display text-2xl sm:text-4xl font-bold text-textPrimary group-hover:text-accent transition-colors duration-200">

@@ -69,7 +69,7 @@ export default function About() {
             About Me
           </h2>
           <p className="font-sans text-lg text-textSecondary leading-relaxed">
-            I’m Jojo Jose, a versatile Computer Science graduate and Cybersecurity candidate seeking entry-level opportunities in Software Development, Data Analysis, or IT Support.
+            I’m Jojo Jose, a versatile Computer Science graduate and M.S. Cybersecurity student seeking entry-level opportunities in Software Development, Data Analysis, or IT Support.
           </p>
           <p className="font-sans text-sm sm:text-base text-textSecondary/80 leading-relaxed">
             I have a proven track record in Python/R automation, SQL database management, and technical troubleshooting. I’m expert at streamlining data workflows, ensuring data quality, and communicating complex technical findings to cross-functional stakeholders.
@@ -124,7 +124,7 @@ export default function About() {
                     <h4 className="font-sans font-bold text-base text-textPrimary">
                       {exp.role}
                     </h4>
-                    <span className="font-mono text-xs text-textSecondary/75">
+                    <span className="font-mono text-sm text-textSecondary font-semibold">
                       {exp.date}
                     </span>
                   </div>
@@ -152,7 +152,7 @@ export default function About() {
             <div className="flex flex-col gap-6">
               {educations.map((edu) => (
                 <div key={edu.degree} className="flex flex-col gap-1">
-                  <span className="font-mono text-[10px] text-textSecondary/65 tracking-wider">
+                  <span className="font-mono text-xs text-textSecondary font-semibold tracking-wide">
                     {edu.date}
                   </span>
                   <h4 className="font-sans font-bold text-sm text-textPrimary">
@@ -192,7 +192,7 @@ export default function About() {
               {skills.map((skill) => (
                 <span
                   key={skill}
-                  className="font-sans text-[10px] tracking-wide uppercase px-2 py-1 rounded border border-borderAccent bg-surface text-textSecondary font-semibold"
+                  className="font-sans text-xs tracking-wide uppercase px-2 py-0.5 rounded border border-borderAccent bg-surface text-textSecondary font-semibold"
                 >
                   {skill}
                 </span>
