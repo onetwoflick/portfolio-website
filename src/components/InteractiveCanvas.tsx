@@ -135,10 +135,11 @@ export default function InteractiveCanvas() {
     const nodeCount = Math.min(Math.floor((width * height) / 9500), 125);
     const nodes: Node[] = [];
 
-    // Dynamic Re-Assembly Constellation Controller
+    // Dynamic Re-Assembly Constellation Controller (using wall-clock milliseconds)
     const constellation = {
       phase: 'idle' as 'idle' | 'forming' | 'holding' | 'dissolving',
-      timer: 650, // Initial calm breathing room (~11s) before first assembly
+      stateStartTime: performance.now(),
+      stateDuration: 16000, // Initial generous breathing room (16s) before first assembly
       activeIndices: [] as number[],
       centerX: 0,
       centerY: 0,
@@ -157,7 +158,8 @@ export default function InteractiveCanvas() {
 
       // Reset active constellation gracefully on window resize
       constellation.phase = 'idle';
-      constellation.timer = 600;
+      constellation.stateStartTime = performance.now();
+      constellation.stateDuration = 18000;
       constellation.opacity = 0;
       for (let i = 0; i < nodes.length; i++) {
         nodes[i].targetX = undefined;
@@ -263,22 +265,23 @@ export default function InteractiveCanvas() {
         ctx.fill();
       }
 
-      // --- DYNAMIC RE-ASSEMBLY STATE MACHINE (Slow, Graceful Cosmic Alignment) ---
-      constellation.timer--;
+      // --- DYNAMIC RE-ASSEMBLY STATE MACHINE (Wall-clock Milliseconds) ---
+      const now = performance.now();
+      const elapsed = now - constellation.stateStartTime;
 
       if (constellation.phase === 'forming') {
-        // Smoothly fade in constellation lines over 450 frames (~7.5s)
-        constellation.opacity = Math.min((1 - constellation.timer / 450) * 0.75, 0.75);
+        const progress = Math.min(elapsed / constellation.stateDuration, 1);
+        constellation.opacity = progress * 0.75;
       } else if (constellation.phase === 'holding') {
         constellation.opacity = 0.75;
       } else if (constellation.phase === 'dissolving') {
-        // Smoothly fade out constellation lines
-        constellation.opacity = Math.max((constellation.timer / 180) * 0.75, 0);
+        const progress = Math.min(elapsed / constellation.stateDuration, 1);
+        constellation.opacity = Math.max((1 - progress) * 0.75, 0);
       } else {
         constellation.opacity = 0;
       }
 
-      if (constellation.timer <= 0) {
+      if (elapsed >= constellation.stateDuration) {
         if (constellation.phase === 'idle') {
           // Select an open celestial location on screen (upper-right quadrant on desktop)
           const isMobile = width < 768;
@@ -325,13 +328,16 @@ export default function InteractiveCanvas() {
 
           constellation.activeIndices = assignedIndices;
           constellation.phase = 'forming';
-          constellation.timer = 320; // Smooth, gentle glide (~5.3s)
+          constellation.stateStartTime = now;
+          constellation.stateDuration = 5500; // Exactly 5.5s slow glide
         } else if (constellation.phase === 'forming') {
           constellation.phase = 'holding';
-          constellation.timer = 380; // ~6.3s clear hold
+          constellation.stateStartTime = now;
+          constellation.stateDuration = 6500; // Exactly 6.5s clear hold
         } else if (constellation.phase === 'holding') {
           constellation.phase = 'dissolving';
-          constellation.timer = 150; // ~2.5s dissolve
+          constellation.stateStartTime = now;
+          constellation.stateDuration = 3000; // Exactly 3.0s dissolve
           for (const idx of constellation.activeIndices) {
             nodes[idx].targetX = undefined;
             nodes[idx].targetY = undefined;
@@ -339,7 +345,9 @@ export default function InteractiveCanvas() {
         } else if (constellation.phase === 'dissolving') {
           constellation.phase = 'idle';
           constellation.activeIndices = [];
-          constellation.timer = Math.floor(Math.random() * 360 + 720); // ~12 - 18s generous breathing room
+          constellation.stateStartTime = now;
+          // Generous breathing room: Exactly 18 to 26 seconds of peaceful starfield!
+          constellation.stateDuration = Math.random() * 8000 + 18000;
         }
       }
 
@@ -365,7 +373,9 @@ export default function InteractiveCanvas() {
 
         // Gentle, Slow Celestial Drift into Constellation
         if (node.targetX !== undefined && node.targetY !== undefined) {
-          const progress = constellation.phase === 'forming' ? (1 - constellation.timer / 320) : 1;
+          const progress = constellation.phase === 'forming'
+            ? Math.min((now - constellation.stateStartTime) / constellation.stateDuration, 1)
+            : 1;
           const pull = 0.005 + progress * 0.016;
 
           // Organic sway so it breathes while formed
@@ -445,7 +455,8 @@ export default function InteractiveCanvas() {
         const mouseDistToCenter = Math.hypot(mouse.x - constellation.centerX, mouse.y - constellation.centerY);
         if (mouseDistToCenter < 140) {
           constellation.phase = 'dissolving';
-          constellation.timer = 90;
+          constellation.stateStartTime = now;
+          constellation.stateDuration = 2500;
           for (const idx of constellation.activeIndices) {
             nodes[idx].targetX = undefined;
             nodes[idx].targetY = undefined;
