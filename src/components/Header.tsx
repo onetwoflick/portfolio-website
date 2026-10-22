@@ -41,7 +41,7 @@ export default function Header({ isMenuOpen, setIsMenuOpen, isDark, setIsDark }:
             onClick={() => navigate('/')}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center w-11 h-11 rounded-full bg-white dark:bg-zinc-900 border border-borderAccent shadow-sm font-mono text-sm font-bold text-accent select-none"
+            className="flex items-center justify-center w-11 h-11 rounded-full bg-surface border border-borderAccent shadow-sm font-mono text-sm font-bold text-accent select-none"
             aria-label="Go to Home"
           >
             [J]
@@ -68,7 +68,7 @@ export default function Header({ isMenuOpen, setIsMenuOpen, isDark, setIsDark }:
             onClick={toggleTheme}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-borderAccent flex items-center justify-center relative overflow-hidden shadow-sm"
+            className="w-10 h-10 rounded-full bg-surface border border-borderAccent flex items-center justify-center relative overflow-hidden shadow-sm"
             aria-label="Toggle dark/light theme"
           >
             <motion.div
@@ -96,7 +96,7 @@ export default function Header({ isMenuOpen, setIsMenuOpen, isDark, setIsDark }:
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="w-10 h-10 rounded-full bg-white dark:bg-zinc-900 border border-borderAccent flex items-center justify-center shadow-sm relative"
+            className="w-10 h-10 rounded-full bg-surface border border-borderAccent flex items-center justify-center shadow-sm relative"
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
           >
             <div className="w-5 h-5 flex flex-col justify-center items-center gap-1.5 relative">
