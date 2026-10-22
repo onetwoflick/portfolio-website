@@ -131,8 +131,8 @@ export default function InteractiveCanvas() {
     let width = window.innerWidth;
     let height = window.innerHeight;
 
-    // High density of crisp, hyper-vibrant neon dots (110 - 130 nodes)
-    const nodeCount = Math.min(Math.floor((width * height) / 9500), 125);
+    // Rich, lush density of crisp, hyper-vibrant neon dots (~160 - 185 nodes)
+    const nodeCount = Math.min(Math.floor((width * height) / 5600), 185);
     const nodes: Node[] = [];
 
     // Dynamic Re-Assembly Constellation Controller (using wall-clock milliseconds)
@@ -304,26 +304,26 @@ export default function InteractiveCanvas() {
             const targetX = constellation.centerX + letter.dx * scale;
             const targetY = constellation.centerY + letter.dy * scale;
 
-            let bestNodeIdx = available[0];
-            let bestDistSq = Infinity;
-            let bestAvailPos = 0;
+            // Rank available stars by distance to this letter point
+            const candidates = available
+              .map((nodeIdx) => ({
+                nodeIdx,
+                distSq: (nodes[nodeIdx].x - targetX) ** 2 + (nodes[nodeIdx].y - targetY) ** 2,
+              }))
+              .sort((a, b) => a.distSq - b.distSq);
 
-            for (let a = 0; a < available.length; a++) {
-              const nodeIdx = available[a];
-              const n = nodes[nodeIdx];
-              const dSq = (n.x - targetX) ** 2 + (n.y - targetY) ** 2;
-              if (dSq < bestDistSq) {
-                bestDistSq = dSq;
-                bestNodeIdx = nodeIdx;
-                bestAvailPos = a;
-              }
-            }
+            // Sample among the top 3 closest stars:
+            // This leaves 65% of nearby stars in place as ambient drifters around and behind JOJO
+            // completely preventing the surrounding area from emptying out or disappearing!
+            const pick = candidates[Math.min(Math.floor(Math.random() * 3), candidates.length - 1)];
+            const pickIdx = pick.nodeIdx;
 
-            assignedIndices[k] = bestNodeIdx;
-            available.splice(bestAvailPos, 1);
+            assignedIndices[k] = pickIdx;
+            const removePos = available.indexOf(pickIdx);
+            if (removePos !== -1) available.splice(removePos, 1);
 
-            nodes[bestNodeIdx].targetX = targetX;
-            nodes[bestNodeIdx].targetY = targetY;
+            nodes[pickIdx].targetX = targetX;
+            nodes[pickIdx].targetY = targetY;
           }
 
           constellation.activeIndices = assignedIndices;
@@ -499,7 +499,7 @@ export default function InteractiveCanvas() {
       }
 
       // --- STEP 4: Ambient Dynamic Geometric Connection Threads ---
-      const connectionDist = 78;
+      const connectionDist = 74;
       const connectionDistSq = connectionDist * connectionDist;
       const activeConnections: { from: number; to: number; color: NeonColor }[] = [];
 
