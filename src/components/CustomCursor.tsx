@@ -1,17 +1,25 @@
-import { useEffect, useState } from 'react';
-import { motion, useMotionValue } from 'framer-motion';
+import { useEffect, useState, useRef } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 export default function CustomCursor() {
   const [hovered, setHovered] = useState(false);
+  const [clicked, setClicked] = useState(false);
   const [hidden, setHidden] = useState(true);
   const [isMobile, setIsMobile] = useState(true);
 
-  // Framer Motion motion values for high-performance coordinate tracking
-  const mouseX = useMotionValue(-100);
-  const mouseY = useMotionValue(-100);
+  // 1. Instantaneous pointer coordinates (0 lag)
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+
+  // 2. High-performance trailing spring for outer follower ring
+  const springConfig = { damping: 28, stiffness: 380, mass: 0.5 };
+  const smoothX = useSpring(cursorX, springConfig);
+  const smoothY = useSpring(cursorY, springConfig);
+
+  const hasEnteredRef = useRef(false);
 
   useEffect(() => {
-    // Detect touch-screen device
+    // Detect touch / coarse pointer devices to disable custom cursor on mobile
     const checkDevice = () => {
       const mobile = window.matchMedia('(hover: none) or (pointer: coarse)').matches;
       setIsMobile(mobile);
@@ -23,24 +31,46 @@ export default function CustomCursor() {
     if (isMobile) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-      if (hidden) setHidden(false);
+      if (!hasEnteredRef.current) {
+        cursorX.set(e.clientX);
+        cursorY.set(e.clientY);
+        smoothX.jump(e.clientX);
+        smoothY.jump(e.clientY);
+        hasEnteredRef.current = true;
+      } else {
+        cursorX.set(e.clientX);
+        cursorY.set(e.clientY);
+      }
+      setHidden(false);
     };
 
     const handleMouseLeave = () => {
       setHidden(true);
+      hasEnteredRef.current = false;
     };
 
-    const handleMouseEnter = () => {
+    const handleMouseEnter = (e: MouseEvent) => {
+      cursorX.set(e.clientX);
+      cursorY.set(e.clientY);
+      smoothX.jump(e.clientX);
+      smoothY.jump(e.clientY);
+      hasEnteredRef.current = true;
       setHidden(false);
     };
 
-    // Global listener for interactive hover detection
+    const handleMouseDown = () => {
+      setClicked(true);
+    };
+
+    const handleMouseUp = () => {
+      setClicked(false);
+    };
+
+    // Detect hoverable targets
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target) return;
-      
+
       const isInteractive =
         target.tagName === 'A' ||
         target.tagName === 'BUTTON' ||
@@ -53,12 +83,15 @@ export default function CustomCursor() {
         target.closest('.interactive') ||
         target.getAttribute('data-hover') === 'true';
 
-      setHovered(!!isInteractive);
+      const shouldHover = !!isInteractive;
+      setHovered((prev) => (prev !== shouldHover ? shouldHover : prev));
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
     document.addEventListener('mouseenter', handleMouseEnter);
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('mouseover', handleMouseOver);
 
     return () => {
@@ -66,49 +99,62 @@ export default function CustomCursor() {
       window.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseleave', handleMouseLeave);
       document.removeEventListener('mouseenter', handleMouseEnter);
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('mouseover', handleMouseOver);
     };
-  }, [isMobile, mouseX, mouseY, hidden]);
+  }, [isMobile, cursorX, cursorY, smoothX, smoothY]);
 
-  if (isMobile || hidden) return null;
+  if (isMobile) return null;
 
   return (
-    <>
-      {/* Outer Spring Ring (Lag-free Rounded Circle) */}
+    <div
+      className="fixed inset-0 pointer-events-none z-[9999] transition-opacity duration-200"
+      style={{ opacity: hidden ? 0 : 1 }}
+    >
+      {/* 1. Fluid Trailing Ring with Smooth Inertia */}
       <motion.div
-        className="fixed top-0 left-0 rounded-full pointer-events-none z-[99999] mix-blend-difference"
+        className="fixed top-0 left-0 rounded-full pointer-events-none border transition-colors duration-200"
         style={{
-          x: mouseX,
-          y: mouseY,
+          x: smoothX,
+          y: smoothY,
           translateX: '-50%',
           translateY: '-50%',
-          width: 30,
-          height: 30,
-          border: hovered ? '1.5px solid var(--color-accent)' : '1px solid var(--color-text-primary)',
-          backgroundColor: hovered ? 'rgba(120, 255, 209, 0.05)' : 'rgba(0,0,0,0)',
+          width: 32,
+          height: 32,
+          borderColor: hovered ? 'var(--color-accent)' : 'rgba(148, 163, 184, 0.45)',
+          backgroundColor: hovered ? 'rgba(0, 245, 255, 0.08)' : 'rgba(0, 0, 0, 0)',
         }}
         animate={{
-          scale: hovered ? 2.0 : 1.0,
+          scale: clicked ? 0.75 : hovered ? 1.65 : 1.0,
         }}
-        transition={{ type: 'tween', ease: 'easeOut', duration: 0.18 }}
+        transition={{
+          type: 'spring',
+          stiffness: 450,
+          damping: 24,
+        }}
       />
-      {/* Inner Dot */}
+
+      {/* 2. Zero-Latency Crisp Focal Dot */}
       <motion.div
-        className="fixed top-0 left-0 rounded-full pointer-events-none z-[99999] mix-blend-difference"
+        className="fixed top-0 left-0 rounded-full pointer-events-none bg-accent shadow-sm"
         style={{
-          x: mouseX,
-          y: mouseY,
+          x: cursorX,
+          y: cursorY,
           translateX: '-50%',
           translateY: '-50%',
           width: 6,
           height: 6,
-          backgroundColor: 'var(--color-accent)',
         }}
         animate={{
-          scale: hovered ? 0 : 1,
+          scale: hovered ? 0 : clicked ? 0.6 : 1,
         }}
-        transition={{ type: 'tween', ease: 'easeOut', duration: 0.15 }}
+        transition={{
+          type: 'tween',
+          ease: 'easeOut',
+          duration: 0.12,
+        }}
       />
-    </>
+    </div>
   );
 }

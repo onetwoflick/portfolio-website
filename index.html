@@ -11,6 +11,33 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Anti-Flash Blocking Theme Script (Runs synchronously before first paint) -->
+    <style>
+      html, body {
+        background-color: #f3f4f7;
+        color: #18181b;
+      }
+      html.dark, html.dark body {
+        background-color: #0d0e13;
+        color: #f4f4f5;
+      }
+    </style>
+    <script>
+      (function() {
+        try {
+          var savedTheme = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.backgroundColor = '#0d0e13';
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.backgroundColor = '#f3f4f7';
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -76,7 +76,7 @@ function App() {
       {/* 2. Custom Spring Cursor */}
       <CustomCursor />
 
-      {/* 3. Orbiting Canvas Geometry Background */}
+      {/* 3. High-Performance Multi-Color Astra Nebula & Canvas Network */}
       <InteractiveCanvas />
 
       {/* 4. Top Overlay Header */}
