@@ -138,7 +138,7 @@ export default function InteractiveCanvas() {
     // Dynamic Re-Assembly Constellation Controller
     const constellation = {
       phase: 'idle' as 'idle' | 'forming' | 'holding' | 'dissolving',
-      timer: 300, // Starts forming leisurely after ~5s
+      timer: 650, // Initial calm breathing room (~11s) before first assembly
       activeIndices: [] as number[],
       centerX: 0,
       centerY: 0,
@@ -157,7 +157,7 @@ export default function InteractiveCanvas() {
 
       // Reset active constellation gracefully on window resize
       constellation.phase = 'idle';
-      constellation.timer = 300;
+      constellation.timer = 600;
       constellation.opacity = 0;
       for (let i = 0; i < nodes.length; i++) {
         nodes[i].targetX = undefined;
@@ -339,7 +339,7 @@ export default function InteractiveCanvas() {
         } else if (constellation.phase === 'dissolving') {
           constellation.phase = 'idle';
           constellation.activeIndices = [];
-          constellation.timer = Math.floor(Math.random() * 200 + 400); // ~7 - 10s idle
+          constellation.timer = Math.floor(Math.random() * 360 + 720); // ~12 - 18s generous breathing room
         }
       }
 
